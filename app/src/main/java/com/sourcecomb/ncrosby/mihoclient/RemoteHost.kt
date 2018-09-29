@@ -4,6 +4,7 @@ import android.util.Log
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.doAsyncResult
 import java.net.Socket
+import java.nio.ByteBuffer
 import java.util.concurrent.Future
 
 private val hexArray = "0123456789ABCDEF".toCharArray()
@@ -32,6 +33,13 @@ class RemoteHost(hostname: String) {
         }
     }
 
+    private fun send(msg: ByteBuffer): Future<Unit> {
+        msg.position(0)
+        val buf = ByteArray(msg.capacity())
+        msg.get(buf)
+        return send(buf)
+    }
+
     private fun send(msg: ByteArray): Future<Unit> {
         thread = thread.doAsyncResult {
             Log.d("RemoteHost", "Writing message ${msg.toHex()}")
@@ -44,17 +52,15 @@ class RemoteHost(hostname: String) {
     }
 
     fun sendMouseMove(dx: Int, dy: Int): Future<Unit> {
-        val buf = ByteArray(3)
-        buf[0] = RemoteAction.MOUSE_MOVE.value
-        buf[1] = dx.toByte()
-        buf[2] = dy.toByte()
-        return send(buf)
+        return send(ByteBuffer.allocate(5)
+                .put(RemoteAction.MOUSE_MOVE.value)
+                .putShort(dx.toShort())
+                .putShort(dy.toShort()))
     }
 
     fun sendMouseClick(btn: Int): Future<Unit> {
-        val buf = ByteArray(2)
-        buf[0] = RemoteAction.MOUSE_CLICK.value
-        buf[1] = (btn - 1).toByte()
-        return send(buf)
+        return send(ByteBuffer.allocate(2)
+                .put(RemoteAction.MOUSE_CLICK.value)
+                .put((btn - 1).toByte()))
     }
 }
