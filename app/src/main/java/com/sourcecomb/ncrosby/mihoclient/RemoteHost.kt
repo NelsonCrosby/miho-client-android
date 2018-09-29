@@ -58,9 +58,10 @@ class RemoteHost(hostname: String) {
                 .putShort(dy.toShort()))
     }
 
-    fun sendMouseClick(btn: Int): Future<Unit> {
-        return send(ByteBuffer.allocate(2)
+    fun sendMouseButton(btn: Int, isDown: Boolean): Future<Unit> {
+        return send(ByteBuffer.allocate(3)
                 .put(RemoteAction.MOUSE_CLICK.value)
-                .put((btn - 1).toByte()))
+                .put((btn - 1).toByte())
+                .put(if (isDown) 1.toByte() else 0.toByte()))
     }
 }

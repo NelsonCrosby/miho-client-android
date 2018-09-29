@@ -1,12 +1,12 @@
 package com.sourcecomb.ncrosby.mihoclient
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
-
 class SimpleTrackpadActivity : AppCompatActivity() {
 
     lateinit var remoteHost: RemoteHost
@@ -21,7 +21,6 @@ class SimpleTrackpadActivity : AppCompatActivity() {
         remoteHost = RemoteHost(resources.getString(R.string.default_host))
 
         findViewById<View>(R.id.trackpad).setOnTouchListener { _, motionEvent ->
-            Log.d("SimpleTrackpad", "Trackpad got motionEvent $motionEvent")
             when (motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Log.d("SimpleTrackpad", "Registered touch start")
@@ -44,17 +43,28 @@ class SimpleTrackpadActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.mouse_left).setOnClickListener {
-            Log.d("SimpleTrackpad", "Buttons got mouse_left clicked")
-            remoteHost.sendMouseClick(1)
+        val btnOnTouch = { buttonID: Int ->
+            { view: View, motionEvent: MotionEvent ->
+                when (motionEvent.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        Log.d("SimpleTrackpad", "Pressing mouse $buttonID")
+                        remoteHost.sendMouseButton(buttonID, true)
+                        true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        view.performClick()
+                        Log.d("SimpleTrackpad", "Releasing mouse $buttonID")
+                        remoteHost.sendMouseButton(buttonID, false)
+                        true
+                    }
+                    else -> false
+                }
+            }
         }
-        findViewById<Button>(R.id.mouse_right).setOnClickListener {
-            Log.d("SimpleTrackpad", "Buttons got mouse_right clicked")
-            remoteHost.sendMouseClick(2)
-        }
-        findViewById<Button>(R.id.mouse_middle).setOnClickListener {
-            Log.d("SimpleTrackpad", "Buttons got mouse_middle clicked")
-            remoteHost.sendMouseClick(3)
-        }
+
+        findViewById<Button>(R.id.mouse_left).setOnTouchListener(btnOnTouch(1))
+        findViewById<Button>(R.id.mouse_right).setOnTouchListener(btnOnTouch(2))
+        findViewById<Button>(R.id.mouse_middle).setOnTouchListener(btnOnTouch(3))
     }
 }
+
