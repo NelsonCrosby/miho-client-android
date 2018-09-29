@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MihoClient</string>
+    <string name="default_host">192.168.1.129</string>
 </resources>
