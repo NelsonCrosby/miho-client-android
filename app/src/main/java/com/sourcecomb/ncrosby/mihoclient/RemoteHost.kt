@@ -17,6 +17,10 @@ fun ByteArray.toHex(): String {
     return String(hexChars)
 }
 
+enum class RemoteAction(val value: Byte) {
+    MOUSE_MOVE(3), MOUSE_CLICK(4)
+}
+
 class RemoteHost(hostname: String) {
     private lateinit var socket: Socket
     private var thread: Future<Unit>
@@ -28,19 +32,29 @@ class RemoteHost(hostname: String) {
         }
     }
 
-    fun sendMouseMove(dx: Int, dy: Int): Future<Unit> {
-        val buf = ByteArray(3)
-        buf[0] = 3
-        buf[1] = dx.toByte()
-        buf[2] = dy.toByte()
-
+    private fun send(msg: ByteArray): Future<Unit> {
         thread = thread.doAsyncResult {
-            Log.d("RemoteHost", "Writing mouse move ${buf.toHex()}")
+            Log.d("RemoteHost", "Writing message ${msg.toHex()}")
             val stream = socket.getOutputStream()
-            stream.write(buf)
+            stream.write(msg)
             stream.flush()
         }
 
         return thread
+    }
+
+    fun sendMouseMove(dx: Int, dy: Int): Future<Unit> {
+        val buf = ByteArray(3)
+        buf[0] = RemoteAction.MOUSE_MOVE.value
+        buf[1] = dx.toByte()
+        buf[2] = dy.toByte()
+        return send(buf)
+    }
+
+    fun sendMouseClick(btn: Int): Future<Unit> {
+        val buf = ByteArray(2)
+        buf[0] = RemoteAction.MOUSE_CLICK.value
+        buf[1] = (btn - 1).toByte()
+        return send(buf)
     }
 }
