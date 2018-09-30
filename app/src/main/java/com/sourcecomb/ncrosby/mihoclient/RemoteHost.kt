@@ -64,4 +64,10 @@ class RemoteHost(hostname: String) {
                 .put((btn - 1).toByte())
                 .put(if (isDown) 1.toByte() else 0.toByte()))
     }
+
+    fun sendMouseClick(btn: Int, timer: Long = 100): Future<Unit> {
+        sendMouseButton(btn, true)
+        thread = thread.doAsyncResult { Thread.sleep(timer) }
+        return sendMouseButton(btn, false)
+    }
 }
