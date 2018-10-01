@@ -21,9 +21,9 @@ class SimpleTrackpadActivity : AppCompatActivity() {
 
         findViewById<TrackpadView>(R.id.trackpad).apply {
             accelFactor = 0.7f
-            setOnMouseMoveListener { _, dx, dy -> remoteHost.sendMouseMove(dx, dy) }
+            setOnMouseMoveListener { _, dx, dy -> remoteHost.mouseSubsystem.move(dx, dy) }
             setOnMouseClickListener {
-                remoteHost.sendMouseClick(1)
+                remoteHost.mouseSubsystem.click(1)
             }
         }
 
@@ -32,13 +32,13 @@ class SimpleTrackpadActivity : AppCompatActivity() {
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
                         Log.d("SimpleTrackpad", "Pressing mouse $buttonID")
-                        remoteHost.sendMouseButton(buttonID, true)
+                        remoteHost.mouseSubsystem.button(buttonID, true)
                         true
                     }
                     MotionEvent.ACTION_UP -> {
                         view.performClick()
                         Log.d("SimpleTrackpad", "Releasing mouse $buttonID")
-                        remoteHost.sendMouseButton(buttonID, false)
+                        remoteHost.mouseSubsystem.button(buttonID, false)
                         true
                     }
                     else -> false
