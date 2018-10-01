@@ -10,7 +10,7 @@ import android.widget.Button
 
 class SimpleTrackpadActivity : AppCompatActivity() {
 
-    lateinit var remoteHost: RemoteHost
+    private lateinit var remoteHost: RemoteHost
 
     @SuppressLint("ClickableViewAccessibility")     // Related to button clicks, which aren't all that clever yet.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,6 +21,7 @@ class SimpleTrackpadActivity : AppCompatActivity() {
 
         findViewById<TrackpadView>(R.id.trackpad).apply {
             accelFactor = 0.7f
+            moveBufferTime = 8
             setOnMouseMoveListener { _, dx, dy -> remoteHost.mouseSubsystem.move(dx, dy) }
             setOnMouseClickListener {
                 remoteHost.mouseSubsystem.click(1)

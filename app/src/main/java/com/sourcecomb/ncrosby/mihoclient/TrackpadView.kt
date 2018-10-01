@@ -17,11 +17,13 @@ class TrackpadView : View {
     }
 
     var accelFactor: Float = 1f
+    var moveBufferTime: Int = 10
     var tapClickDelay: Int = 100
 
     private var mouseMoveListener: OnMouseMoveListener? = null
     private var mouseClickListener: OnMouseClickListener? = null
 
+    private var lastTime: Long = 0
     private var lastX: Float = 0f
     private var lastY: Float = 0f
 
@@ -72,27 +74,37 @@ class TrackpadView : View {
                     Log.d("TrackpadView", "Touch was brief; sending click")
                     if (mouseClickListener != null)
                         mouseClickListener!!.onEvent()
+                } else {
+                    applyMove(event)
                 }
                 true
             }
             MotionEvent.ACTION_MOVE -> {
-                val newX = event.x
-                val newY = event.y
-                val x = ((newX - lastX) * accelFactor).toInt()
-                val y = ((newY - lastY) * accelFactor).toInt()
-
-                if (x != 0 && y != 0) {
-                    lastX = newX
-                    lastY = newY
-                    Log.d("TrackpadView", "Moving mouse ($x, $y)")
-                    if (mouseMoveListener != null) {
-                        mouseMoveListener!!.onEvent(x, y)
-                    }
+                val time = event.eventTime
+                if (time - lastTime > moveBufferTime) {
+                    lastTime = time
+                    applyMove(event)
                 }
 
                 true
             }
             else -> false
+        }
+    }
+
+    private fun applyMove(event: MotionEvent) {
+        val newX = event.x
+        val newY = event.y
+        val x = ((newX - lastX) * accelFactor).toInt()
+        val y = ((newY - lastY) * accelFactor).toInt()
+
+        if (x != 0 && y != 0) {
+            lastX = newX
+            lastY = newY
+            Log.d("TrackpadView", "Moving mouse ($x, $y)")
+            if (mouseMoveListener != null) {
+                mouseMoveListener!!.onEvent(x, y)
+            }
         }
     }
 }
