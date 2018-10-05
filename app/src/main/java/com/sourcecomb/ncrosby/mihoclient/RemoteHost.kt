@@ -6,6 +6,7 @@ import co.nstant.`in`.cbor.CborDecoder
 import co.nstant.`in`.cbor.CborEncoder
 import co.nstant.`in`.cbor.model.Array
 import co.nstant.`in`.cbor.model.DataItem
+import co.nstant.`in`.cbor.model.Number
 import co.nstant.`in`.cbor.model.UnicodeString
 import org.jetbrains.anko.doAsync
 import java.io.BufferedOutputStream
@@ -28,11 +29,11 @@ class RemoteHost(hostname: String) {
     private lateinit var sendThread: Thread
     private lateinit var recvThread: Thread
     private var sendQueue: BlockingQueue<List<DataItem>> = LinkedBlockingQueue()
-    private var recvQueue: BlockingQueue<(msg: DataItem) -> Unit> = LinkedBlockingQueue()
+    private var recvQueue: BlockingQueue<(status: Int, value: DataItem) -> Unit> = LinkedBlockingQueue()
 
     init {
         doAsync {
-            socket = Socket(hostname, 1234)
+            socket = Socket(hostname, 6446)
             socket.tcpNoDelay = true
 
             bufferedOutput = BufferedOutputStream(socket.getOutputStream())
@@ -52,7 +53,6 @@ class RemoteHost(hostname: String) {
                 Log.d("RemoteHost", "starting send loop")
                 while (true) {
                     val msg = sendQueue.take()
-                    Log.d("RemoteHost", "sending message $msg")
                     val msgArray = Array()
                     msg.forEach { msgArray.add(it) }
                     cborEnc.encode(msgArray)
@@ -64,15 +64,25 @@ class RemoteHost(hostname: String) {
             recvThread = Thread({
                 Log.d("RemoteHost", "starting recv loop")
                 cborDec.decode {
-                    Log.d("RemoteHost", "recving message $it")
-                    recvQueue.take()(it)
+                    val msg = (it as Array).dataItems
+                    val subsys = (msg[0] as Number).value.toLong()
+                    val status = (msg[1] as Number).value.toInt()
+
+                    if (subsys == 0L && status < 0) {
+                        val code = (msg[2] as Number).value.toLong()
+                        val message = (msg[3] as UnicodeString).string
+                        Log.d("RemoteHost", "ERR: $code, $message")
+                    } else {
+                        val value = msg[2]
+                        recvQueue.take()(status, value)
+                    }
                 }
             }, "RemoteHostRecv")
             recvThread.start()
 
-            recvQueue.put {
+            recvQueue.put { _, subsystems ->
                 var i = 0L
-                for (sysName in (it as Array).dataItems) {
+                for (sysName in (subsystems as Array).dataItems) {
                     i += 1      // First subsystem has ID 1
                     val name = (sysName as UnicodeString).string
                     Log.d("RemoteHost", "got subsystem $name")
@@ -89,7 +99,7 @@ class RemoteHost(hostname: String) {
     private fun send(msg: List<DataItem>): Boolean = sendQueue.offer(msg)
     private fun send(msg: CborBuilder): Boolean = send(msg.build())
 
-    private fun query(msg: List<DataItem>, callback: (response: DataItem) -> Unit): Boolean {
+    private fun query(msg: List<DataItem>, callback: (status: Int, value: DataItem) -> Unit): Boolean {
         return if (recvQueue.offer(callback)) {
             sendQueue.put(msg)
             true
