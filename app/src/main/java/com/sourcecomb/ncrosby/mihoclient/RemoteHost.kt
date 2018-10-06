@@ -1,6 +1,7 @@
 package com.sourcecomb.ncrosby.mihoclient
 
 import android.util.Log
+import androidx.lifecycle.ViewModel
 import co.nstant.`in`.cbor.CborBuilder
 import co.nstant.`in`.cbor.CborDecoder
 import co.nstant.`in`.cbor.CborEncoder
@@ -10,16 +11,21 @@ import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.Number
 import co.nstant.`in`.cbor.model.UnicodeString
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.io.BufferedOutputStream
 import java.net.Socket
-import java.net.SocketException
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
-class RemoteHost(hostname: String) {
+class RemoteHost: ViewModel() {
     enum class CoreAction(val value: Long) {
         QUERY_SUBSYSTEMS(0),
     }
+
+    var connected: Boolean = false
+        private set
+    var hostname: String? = null
+    var port: Int = 6446
 
     private lateinit var socket: Socket
     private lateinit var bufferedOutput: BufferedOutputStream
@@ -33,10 +39,12 @@ class RemoteHost(hostname: String) {
     private var sendQueue: BlockingQueue<List<DataItem>> = LinkedBlockingQueue()
     private var recvQueue: BlockingQueue<(status: Int, value: DataItem) -> Unit> = LinkedBlockingQueue()
 
-    init {
+    fun connect(onDone: () -> Unit) {
         doAsync {
-            socket = Socket(hostname, 6446)
+            socket = Socket(hostname!!, port)
             socket.tcpNoDelay = true
+
+            connected = true
 
             bufferedOutput = BufferedOutputStream(socket.getOutputStream())
             cborEnc = CborEncoder(bufferedOutput)
@@ -102,6 +110,8 @@ class RemoteHost(hostname: String) {
                         }
                     }
                 }
+
+                uiThread { onDone() }
             }
         }
     }
@@ -119,6 +129,7 @@ class RemoteHost(hostname: String) {
     fun close() {
         sendThread.interrupt()
         socket.close()
+        connected = false
     }
 
     open class Subsystem(val host: RemoteHost, val id: Long)

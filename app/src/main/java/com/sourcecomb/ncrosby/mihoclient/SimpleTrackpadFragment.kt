@@ -2,25 +2,34 @@ package com.sourcecomb.ncrosby.mihoclient
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 
-class SimpleTrackpadActivity : AppCompatActivity() {
+class SimpleTrackpadFragment : Fragment() {
 
     private lateinit var remoteHost: RemoteHost
 
-    @SuppressLint("ClickableViewAccessibility")     // Related to button clicks, which aren't all that clever yet.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_simple_trackpad)
+        remoteHost = activity!!.run { ViewModelProviders.of(this).get(RemoteHost::class.java) }
+    }
 
-        findViewById<TrackpadView>(R.id.trackpad).apply {
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_simple_trackpad, container, false)
+
+        view.findViewById<TrackpadView>(R.id.trackpad).apply {
             accelFactor = 0.7f
             moveBufferTime = 8
-            setOnMouseMoveListener { _, dx, dy -> remoteHost.mouseSubsystem.move(dx, dy) }
+            setOnMouseMoveListener { _, dx, dy ->
+                remoteHost.mouseSubsystem.move(dx, dy)
+            }
             setOnMouseClickListener {
                 remoteHost.mouseSubsystem.click(1)
             }
@@ -45,19 +54,10 @@ class SimpleTrackpadActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.mouse_left).setOnTouchListener(btnOnTouch(1))
-        findViewById<Button>(R.id.mouse_right).setOnTouchListener(btnOnTouch(2))
-        findViewById<Button>(R.id.mouse_middle).setOnTouchListener(btnOnTouch(3))
-    }
+        view.findViewById<Button>(R.id.mouse_left).setOnTouchListener(btnOnTouch(1))
+        view.findViewById<Button>(R.id.mouse_right).setOnTouchListener(btnOnTouch(2))
+        view.findViewById<Button>(R.id.mouse_middle).setOnTouchListener(btnOnTouch(3))
 
-    override fun onStart() {
-        super.onStart()
-        remoteHost = RemoteHost(resources.getString(R.string.default_host))
-    }
-
-    override fun onStop() {
-        super.onStop()
-        remoteHost.close()
+        return view
     }
 }
-
