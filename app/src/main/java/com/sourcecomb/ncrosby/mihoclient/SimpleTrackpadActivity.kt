@@ -17,8 +17,6 @@ class SimpleTrackpadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simple_trackpad)
 
-        remoteHost = RemoteHost(resources.getString(R.string.default_host))
-
         findViewById<TrackpadView>(R.id.trackpad).apply {
             accelFactor = 0.7f
             moveBufferTime = 8
@@ -50,6 +48,16 @@ class SimpleTrackpadActivity : AppCompatActivity() {
         findViewById<Button>(R.id.mouse_left).setOnTouchListener(btnOnTouch(1))
         findViewById<Button>(R.id.mouse_right).setOnTouchListener(btnOnTouch(2))
         findViewById<Button>(R.id.mouse_middle).setOnTouchListener(btnOnTouch(3))
+    }
+
+    override fun onStart() {
+        super.onStart()
+        remoteHost = RemoteHost(resources.getString(R.string.default_host))
+    }
+
+    override fun onStop() {
+        super.onStop()
+        remoteHost.close()
     }
 }
 

@@ -26,9 +26,9 @@ mother.
 ## TODO ##
 
 - [x] Simple mouse move and button control
-- [ ] Reconnect on app reload
-  - Right now, the app loses connection when it is unfocused and must be
-    restarted to get control back.
+- [x] Reconnect on app reload
+  - ~~Right now, the app loses connection when it is unfocused and must be
+    restarted to get control back.~~
 - [ ] Expose connection options and tweakable settings to user
 - [ ] Mouse wheel/scroll support
 - [ ] SSH transport layer

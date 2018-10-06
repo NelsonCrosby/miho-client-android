@@ -4,6 +4,7 @@ import android.util.Log
 import co.nstant.`in`.cbor.CborBuilder
 import co.nstant.`in`.cbor.CborDecoder
 import co.nstant.`in`.cbor.CborEncoder
+import co.nstant.`in`.cbor.CborException
 import co.nstant.`in`.cbor.model.Array
 import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.Number
@@ -11,6 +12,7 @@ import co.nstant.`in`.cbor.model.UnicodeString
 import org.jetbrains.anko.doAsync
 import java.io.BufferedOutputStream
 import java.net.Socket
+import java.net.SocketException
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -50,32 +52,40 @@ class RemoteHost(hostname: String) {
             Log.d("RemoteHost", "sent subsystem query")
 
             sendThread = Thread({
-                Log.d("RemoteHost", "starting send loop")
-                while (true) {
-                    val msg = sendQueue.take()
-                    val msgArray = Array()
-                    msg.forEach { msgArray.add(it) }
-                    cborEnc.encode(msgArray)
-                    bufferedOutput.flush()
+                try {
+                    Log.d("RemoteHost", "starting send loop")
+                    while (true) {
+                        val msg = sendQueue.take()
+                        val msgArray = Array()
+                        msg.forEach { msgArray.add(it) }
+                        cborEnc.encode(msgArray)
+                        bufferedOutput.flush()
+                    }
+                } catch (exc: InterruptedException) {
+                    Log.d("RemoteHost", "stopping send loop")
                 }
             }, "RemoteHostSend")
             sendThread.start()
 
             recvThread = Thread({
-                Log.d("RemoteHost", "starting recv loop")
-                cborDec.decode {
-                    val msg = (it as Array).dataItems
-                    val subsys = (msg[0] as Number).value.toLong()
-                    val status = (msg[1] as Number).value.toInt()
+                try {
+                    Log.d("RemoteHost", "starting recv loop")
+                    cborDec.decode {
+                        val msg = (it as Array).dataItems
+                        val subsys = (msg[0] as Number).value.toLong()
+                        val status = (msg[1] as Number).value.toInt()
 
-                    if (subsys == 0L && status < 0) {
-                        val code = (msg[2] as Number).value.toLong()
-                        val message = (msg[3] as UnicodeString).string
-                        Log.d("RemoteHost", "ERR: $code, $message")
-                    } else {
-                        val value = msg[2]
-                        recvQueue.take()(status, value)
+                        if (subsys == 0L && status < 0) {
+                            val code = (msg[2] as Number).value.toLong()
+                            val message = (msg[3] as UnicodeString).string
+                            Log.d("RemoteHost", "ERR: $code, $message")
+                        } else {
+                            val value = msg[2]
+                            recvQueue.take()(status, value)
+                        }
                     }
+                } catch (exc: CborException) {
+                    Log.d("RemoteHost", "stopping recv loop (${exc.message})")
                 }
             }, "RemoteHostRecv")
             recvThread.start()
@@ -104,6 +114,11 @@ class RemoteHost(hostname: String) {
             sendQueue.put(msg)
             true
         } else { false }
+    }
+
+    fun close() {
+        sendThread.interrupt()
+        socket.close()
     }
 
     open class Subsystem(val host: RemoteHost, val id: Long)
