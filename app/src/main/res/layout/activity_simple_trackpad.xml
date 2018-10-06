@@ -6,55 +6,54 @@
     android:layout_height="match_parent"
     tools:context=".SimpleTrackpadActivity">
 
-    <LinearLayout
-        android:layout_width="327dp"
-        android:layout_height="478dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <com.sourcecomb.ncrosby.mihoclient.TrackpadView
+        android:id="@+id/trackpad"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/trackpad_border"
+        app:layout_constraintBottom_toTopOf="@+id/button_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!--
-        <View
-            android:id="@+id/trackpad"
-            android:layout_width="match_parent"
-            android:layout_height="431dp" />
-        -->
+    <LinearLayout
+        android:id="@+id/button_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:orientation="horizontal"
+        android:paddingLeft="-2dp"
+        android:paddingRight="-2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" >
 
-        <com.sourcecomb.ncrosby.mihoclient.TrackpadView
-            android:id="@+id/trackpad"
-            android:layout_width="match_parent"
-            android:layout_height="431dp" />
-
-        <LinearLayout
-            android:id="@+id/button_bar"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/mouse_left"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            tools:ignore="ButtonStyle" />
 
-            <Button
-                android:id="@+id/mouse_left"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+        <Button
+            android:id="@+id/mouse_middle"
+            android:layout_width="33dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:ignore="ButtonStyle" />
 
-            <Button
-                android:id="@+id/mouse_middle"
-                android:layout_width="33dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/mouse_right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/mouse_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
