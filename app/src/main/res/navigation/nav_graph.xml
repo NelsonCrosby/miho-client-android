@@ -13,10 +13,21 @@
         <action
             android:id="@+id/action_connected"
             app:destination="@id/simpleTrackpadFragment" />
+        <action
+            android:id="@+id/action_settings"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/simpleTrackpadFragment"
         android:name="com.sourcecomb.ncrosby.mihoclient.SimpleTrackpadFragment"
         android:label="fragment_simple_trackpad"
-        tools:layout="@layout/fragment_simple_trackpad" />
+        tools:layout="@layout/fragment_simple_trackpad" >
+        <action
+            android:id="@+id/action_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.sourcecomb.ncrosby.mihoclient.SettingsFragment"
+        android:label="SettingsFragment" />
 </navigation>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.preference.PreferenceCategory
+        android:title="TRACKPAD SETTINGS"
+        android:key="pref_key_trackpad_settings">
+        <androidx.preference.SeekBarPreference
+            android:key="pref_key_trackpad_sensitivity"
+            android:title="Sensitivity"
+            android:defaultValue="70"
+            android:max="150"/>
+        <androidx.preference.SeekBarPreference
+            android:key="pref_key_trackpad_buffer"
+            android:summary="Time to buffer movements before sending them to the host"
+            android:title="Responsiveness Buffer"
+            android:defaultValue="8"
+            android:max="64"/>
+    </androidx.preference.PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

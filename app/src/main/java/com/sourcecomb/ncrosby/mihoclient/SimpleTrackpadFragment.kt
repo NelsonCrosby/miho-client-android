@@ -1,6 +1,7 @@
 package com.sourcecomb.ncrosby.mihoclient
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.preference.PreferenceManager
 
 class SimpleTrackpadFragment : Fragment() {
 
@@ -24,14 +26,27 @@ class SimpleTrackpadFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_simple_trackpad, container, false)
 
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+
         view.findViewById<TrackpadView>(R.id.trackpad).apply {
-            accelFactor = 0.7f
-            moveBufferTime = 8
             setOnMouseMoveListener { _, dx, dy ->
                 remoteHost.mouseSubsystem.move(dx, dy)
             }
             setOnMouseClickListener {
                 remoteHost.mouseSubsystem.click(1)
+            }
+
+            accelFactor = prefs.getInt("pref_key_trackpad_sensitivity", 100) / 100f
+            moveBufferTime = prefs.getInt("pref_key_trackpad_buffer", 8)
+            prefs.registerOnSharedPreferenceChangeListener { prefs, key ->
+                when (key) {
+                    "pref_key_trackpad_sensitivity" -> {
+                        accelFactor = prefs.getInt(key, 100) / 100f
+                    }
+                    "pref_key_trackpad_buffer" -> {
+                        moveBufferTime = prefs.getInt(key, 8)
+                    }
+                }
             }
         }
 

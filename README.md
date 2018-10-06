@@ -29,7 +29,7 @@ mother.
 - [x] Reconnect on app reload
   - ~~Right now, the app loses connection when it is unfocused and must be
     restarted to get control back.~~
-- [ ] Expose connection options and tweakable settings to user
+- [x] Expose connection options and tweakable settings to user
 - [ ] Mouse wheel/scroll support
 - [ ] SSH transport layer
 - [ ] Keyboard support
