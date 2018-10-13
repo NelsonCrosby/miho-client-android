@@ -3,25 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/connectFragment">
+    app:startDestination="@id/connectionInfoFragment">
 
     <fragment
-        android:id="@+id/connectFragment"
-        android:name="com.sourcecomb.ncrosby.mihoclient.ConnectFragment"
+        android:id="@+id/connectionInfoFragment"
+        android:name="com.sourcecomb.ncrosby.mihoclient.ConnectionInfoFragment"
         android:label="fragment_connect"
-        tools:layout="@layout/fragment_connect" >
-        <action
-            android:id="@+id/action_connected"
-            app:destination="@id/simpleTrackpadFragment" />
+        tools:layout="@layout/fragment_connection_info" >
         <action
             android:id="@+id/action_settings"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_connect"
+            app:destination="@id/connectFragment" />
     </fragment>
     <fragment
-        android:id="@+id/simpleTrackpadFragment"
-        android:name="com.sourcecomb.ncrosby.mihoclient.SimpleTrackpadFragment"
+        android:id="@+id/trackpadSubsystemFragment"
+        android:name="com.sourcecomb.ncrosby.mihoclient.TrackpadSubsystemFragment"
         android:label="fragment_simple_trackpad"
-        tools:layout="@layout/fragment_simple_trackpad" >
+        tools:layout="@layout/fragment_subsystem_trackpad" >
         <action
             android:id="@+id/action_settings"
             app:destination="@id/settingsFragment" />
@@ -30,4 +30,19 @@
         android:id="@+id/settingsFragment"
         android:name="com.sourcecomb.ncrosby.mihoclient.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/connectFragment"
+        android:name="com.sourcecomb.ncrosby.mihoclient.ConnectFragment"
+        android:label="fragment_connect"
+        tools:layout="@layout/fragment_connect" >
+        <argument
+            android:name="hostname"
+            app:argType="string" />
+        <argument
+            android:name="port"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_connected"
+            app:destination="@id/trackpadSubsystemFragment" />
+    </fragment>
 </navigation>

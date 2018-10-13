@@ -24,8 +24,6 @@ class RemoteHost: ViewModel() {
 
     var connected: Boolean = false
         private set
-    var hostname: String? = null
-    var port: Int = 6446
 
     private lateinit var socket: Socket
     private lateinit var bufferedOutput: BufferedOutputStream
@@ -39,9 +37,9 @@ class RemoteHost: ViewModel() {
     private var sendQueue: BlockingQueue<List<DataItem>> = LinkedBlockingQueue()
     private var recvQueue: BlockingQueue<(status: Int, value: DataItem) -> Unit> = LinkedBlockingQueue()
 
-    fun connect(onDone: () -> Unit) {
+    fun connect(hostname: String, port: Int = 6446, onDone: () -> Unit) {
         doAsync {
-            socket = Socket(hostname!!, port)
+            socket = Socket(hostname, port)
             socket.tcpNoDelay = true
 
             connected = true

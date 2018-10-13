@@ -1,7 +1,6 @@
 package com.sourcecomb.ncrosby.mihoclient
 
 import android.annotation.SuppressLint
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,27 +12,27 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.preference.PreferenceManager
 
-class SimpleTrackpadFragment : Fragment() {
-
-    private lateinit var remoteHost: RemoteHost
+class TrackpadSubsystemFragment : Fragment() {
+    private lateinit var mouseManager: RemoteConnectionManager.MouseSubsystemManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        remoteHost = activity!!.run { ViewModelProviders.of(this).get(RemoteHost::class.java) }
+        mouseManager = (activity!! as RemoteConnectionManager).mouse
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_simple_trackpad, container, false)
+        val view = inflater.inflate(R.layout.fragment_subsystem_trackpad, container, false)
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
         view.findViewById<TrackpadView>(R.id.trackpad).apply {
             setOnMouseMoveListener { _, dx, dy ->
-                remoteHost.mouseSubsystem.move(dx, dy)
+                mouseManager.move(dx, dy)
             }
             setOnMouseClickListener {
-                remoteHost.mouseSubsystem.click(1)
+                mouseManager.button(1, true)
+                mouseManager.button(1, false)
             }
 
             accelFactor = prefs.getInt("pref_key_trackpad_sensitivity", 100) / 100f
@@ -55,13 +54,13 @@ class SimpleTrackpadFragment : Fragment() {
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
                         Log.d("SimpleTrackpad", "Pressing mouse $buttonID")
-                        remoteHost.mouseSubsystem.button(buttonID, true)
+                        mouseManager.button(buttonID, true)
                         true
                     }
                     MotionEvent.ACTION_UP -> {
                         view.performClick()
                         Log.d("SimpleTrackpad", "Releasing mouse $buttonID")
-                        remoteHost.mouseSubsystem.button(buttonID, false)
+                        mouseManager.button(buttonID, false)
                         true
                     }
                     else -> false

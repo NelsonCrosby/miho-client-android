@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SimpleTrackpadFragment">
+    tools:context=".TrackpadSubsystemFragment">
 
     <com.sourcecomb.ncrosby.mihoclient.TrackpadView
         android:id="@+id/trackpad"

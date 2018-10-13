@@ -1,6 +1,7 @@
 package com.sourcecomb.ncrosby.mihoclient
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +10,10 @@ import androidx.navigation.findNavController
 import androidx.preference.PreferenceManager
 import kotlinx.android.synthetic.main.activity_main_nav.*
 
-class MainNavActivity : AppCompatActivity() {
-
+class MainNavActivity : AppCompatActivity(), RemoteConnectionManager {
     private lateinit var remoteHost: RemoteHost
+    private var hostname: String? = null
+    private var port: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,18 +25,49 @@ class MainNavActivity : AppCompatActivity() {
         remoteHost = ViewModelProviders.of(this).get(RemoteHost::class.java)
     }
 
+    override val connected: Boolean
+        get() = remoteHost.connected
+
+    override fun connect(hostname: String, port: Int, onDone: () -> Unit) {
+        this.hostname = hostname
+        this.port = port
+
+        Log.d("MainNavActivity", "Connecting to $hostname:$port")
+        if (port == 0) {
+            remoteHost.connect(hostname, onDone = onDone)
+        } else {
+            remoteHost.connect(hostname, port, onDone)
+        }
+    }
+    override fun disconnect() {
+        if (connected) {
+            Log.d("MainNavActivity", "Disconnecting from $hostname:$port")
+            remoteHost.close()
+        }
+    }
+
+    override val mouse: RemoteConnectionManager.MouseSubsystemManager =
+            object : RemoteConnectionManager.MouseSubsystemManager {
+                override fun move(dx: Int, dy: Int) {
+                    remoteHost.mouseSubsystem.move(dx, dy)
+                }
+
+                override fun button(btn: Int, isDown: Boolean) {
+                    remoteHost.mouseSubsystem.button(btn, isDown)
+                }
+            }
+
     override fun onStart() {
         super.onStart()
-        if (remoteHost.hostname != null) {
-            remoteHost.connect {}
+        val hostname = hostname
+        if (hostname != null) {
+            connect(hostname, port) {}
         }
     }
 
     override fun onStop() {
         super.onStop()
-        if (remoteHost.connected) {
-            remoteHost.close()
-        }
+        disconnect()
     }
 
     override fun onSupportNavigateUp() = findNavController(R.id.nav_host).navigateUp()

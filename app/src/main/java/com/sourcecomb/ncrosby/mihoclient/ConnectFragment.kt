@@ -2,71 +2,68 @@ package com.sourcecomb.ncrosby.mihoclient
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 
+
+private const val ARG_HOSTNAME = "hostname"
+private const val ARG_PORT = "port"
+
 class ConnectFragment : Fragment() {
-    private lateinit var remoteHost: RemoteHost
+    private var hostname: String = ""
+    private var port: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        remoteHost = activity!!.run { ViewModelProviders.of(this).get(RemoteHost::class.java) }
+        arguments?.let {
+            hostname = it.getString(ARG_HOSTNAME)!!
+            port = it.getInt(ARG_PORT)
+            Log.d("ConnectFragment", "Arguments: " +
+                    "$ARG_HOSTNAME = $hostname; " +
+                    "$ARG_PORT = $port")
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_connect, container, false)
-        val hostnameField = view.findViewById<EditText>(R.id.edit_hostname).text
-        val portField = view.findViewById<EditText>(R.id.edit_port).text
-
-        val sp = context?.getSharedPreferences("remember", Context.MODE_PRIVATE)
-        if (sp != null) {
-            val connectLast = sp.getString("connect_last", null)
-            if (connectLast != null) {
-                val connectParams = connectLast.split(':')
-                val lastHostname = connectParams[0]
-                val lastPort = connectParams[1]
-
-                hostnameField.clear()
-                hostnameField.insert(0, lastHostname)
-                portField.clear()
-                portField.insert(0, lastPort)
-            }
+        arguments?.let {
+            hostname = it.getString(ARG_HOSTNAME)!!
+            port = it.getInt(ARG_PORT)
+            Log.d("ConnectFragment", "Arguments: " +
+                    "$ARG_HOSTNAME = $hostname; " +
+                    "$ARG_PORT = $port")
         }
 
-        view.findViewById<Button>(R.id.btn_connect).setOnClickListener { _ ->
-            remoteHost.hostname = hostnameField.toString()
-            remoteHost.port = portField.toString().toInt()
-
-            val dialog = activity?.let {
-                val builder = AlertDialog.Builder(it)
-                builder.apply {
-                    setMessage("Connecting to ${remoteHost.hostname}:${remoteHost.port}...")
-                    setTitle("Connecting")
-                }
-
-                builder.create()
-            }
-
-            dialog?.show()
-            remoteHost.connect {
-                sp?.edit()
-                        ?.putString("connect_last", "${remoteHost.hostname}:${remoteHost.port}")
-                        ?.apply()
-
-                dialog?.hide()
-                view.findNavController().navigate(R.id.action_connected)
-            }
+        val view = inflater.inflate(R.layout.fragment_connect, container, false)
+        view.findViewById<TextView>(R.id.lbl_connect_to).apply {
+            text = String.format(text.toString(), hostname, port)
         }
 
         return view
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val manager = activity!! as RemoteConnectionManager
+
+        manager.connect(hostname, port) {
+            view!!.findNavController().navigate(R.id.action_connected)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(hostname: String, port: Int) =
+                ConnectFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(ARG_HOSTNAME, hostname)
+                        putInt(ARG_PORT, port)
+                    }
+                }
     }
 }

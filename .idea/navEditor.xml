@@ -13,18 +13,25 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="-1267" />
-                            <option name="y" value="-592" />
+                            <option name="x" value="113" />
+                            <option name="y" value="156" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="connectionInfoFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="-241" />
+                            <option name="y" value="47" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_connectFragment_to_settingsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_connected">
+                            <entry key="action_settings">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -39,25 +46,25 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="-580" />
-                            <option name="y" value="-789" />
+                            <option name="x" value="773" />
+                            <option name="y" value="-164" />
                           </Point>
                         </option>
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="simpleTrackpadFragment">
+                  <entry key="trackpadSubsystemFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="-940" />
-                            <option name="y" value="-497" />
+                            <option name="x" value="446" />
+                            <option name="y" value="104" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_simpleTrackpadFragment_to_settingsFragment">
+                            <entry key="action_settings">
                               <value>
                                 <LayoutPositions />
                               </value>
