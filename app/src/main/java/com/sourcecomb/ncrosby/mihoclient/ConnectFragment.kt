@@ -50,8 +50,12 @@ class ConnectFragment : Fragment() {
         super.onStart()
         val manager = activity!! as RemoteConnectionManager
 
-        manager.connect(hostname, port) {
-            view!!.findNavController().navigate(R.id.action_connected)
+        if (manager.connected) {
+            manager.disconnect()
+        } else {
+            manager.connect(hostname, port) {
+                view!!.findNavController().navigate(R.id.action_connected)
+            }
         }
     }
 
