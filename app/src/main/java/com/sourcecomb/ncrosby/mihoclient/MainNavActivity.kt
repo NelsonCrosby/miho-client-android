@@ -23,6 +23,9 @@ class MainNavActivity : AppCompatActivity(), RemoteConnectionManager {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         remoteHost = ViewModelProviders.of(this).get(RemoteHost::class.java)
+        remoteHost.onClose {
+            disconnect()
+        }
     }
 
     override val connected: Boolean
@@ -44,6 +47,8 @@ class MainNavActivity : AppCompatActivity(), RemoteConnectionManager {
             Log.d("MainNavActivity", "Disconnecting from $hostname:$port")
             remoteHost.close()
         }
+
+        findNavController(R.id.nav_host).navigate(R.id.connectionInfoFragment)
     }
 
     override val mouse: RemoteConnectionManager.MouseSubsystemManager =

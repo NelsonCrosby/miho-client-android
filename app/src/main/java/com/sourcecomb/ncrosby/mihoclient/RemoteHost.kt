@@ -37,6 +37,8 @@ class RemoteHost: ViewModel() {
     private var sendQueue: BlockingQueue<List<DataItem>> = LinkedBlockingQueue()
     private var recvQueue: BlockingQueue<(status: Int, value: DataItem) -> Unit> = LinkedBlockingQueue()
 
+    private var onCloseListener: (() -> Unit)? = null
+
     fun connect(hostname: String, port: Int = 6446, onDone: () -> Unit) {
         doAsync {
             socket = Socket(hostname, port)
@@ -92,6 +94,7 @@ class RemoteHost: ViewModel() {
                     }
                 } catch (exc: CborException) {
                     Log.d("RemoteHost", "stopping recv loop (${exc.message})")
+                    this@RemoteHost.close()
                 }
             }, "RemoteHostRecv")
             recvThread.start()
@@ -128,6 +131,12 @@ class RemoteHost: ViewModel() {
         sendThread.interrupt()
         socket.close()
         connected = false
+
+        onCloseListener?.invoke()
+    }
+
+    fun onClose(callback: () -> Unit) {
+        onCloseListener = callback
     }
 
     open class Subsystem(val host: RemoteHost, val id: Long)
