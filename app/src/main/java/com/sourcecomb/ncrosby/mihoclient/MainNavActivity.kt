@@ -35,11 +35,18 @@ class MainNavActivity : AppCompatActivity(), RemoteConnectionManager {
         this.hostname = hostname
         this.port = port
 
+        val localDone = { successful: Boolean ->
+            if (successful)
+                onDone()
+            else
+                disconnect()
+        }
+
         Log.d("MainNavActivity", "Connecting to $hostname:$port")
         if (port == 0) {
-            remoteHost.connect(hostname, onDone = onDone)
+            remoteHost.connect(hostname, onDone = localDone)
         } else {
-            remoteHost.connect(hostname, port, onDone)
+            remoteHost.connect(hostname, port, localDone)
         }
     }
     override fun disconnect() {

@@ -13,7 +13,7 @@ import co.nstant.`in`.cbor.model.UnicodeString
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.BufferedOutputStream
-import java.net.Socket
+import java.net.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -39,9 +39,16 @@ class RemoteHost: ViewModel() {
 
     private var onCloseListener: (() -> Unit)? = null
 
-    fun connect(hostname: String, port: Int = 6446, onDone: () -> Unit) {
+    fun connect(hostname: String, port: Int = 6446, onDone: (successful: Boolean) -> Unit) {
         doAsync {
-            socket = Socket(hostname, port)
+            try {
+                socket = Socket()
+                socket.connect(InetSocketAddress(hostname, port), 1000)
+            } catch (exc: SocketTimeoutException) {
+                uiThread { onDone(false) }
+                return@doAsync
+            }
+
             socket.tcpNoDelay = true
 
             connected = true
@@ -112,7 +119,7 @@ class RemoteHost: ViewModel() {
                     }
                 }
 
-                uiThread { onDone() }
+                uiThread { onDone(true) }
             }
         }
     }
